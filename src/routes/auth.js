@@ -1,9 +1,25 @@
 import {Router} from 'express';
 import users from '../models/users.json';
 import JWT from 'jsonwebtoken';
+import passport from 'passport';
+import PassportLocal from 'passport-local';
 
+const LocalStrategy = PassportLocal.Strategy;
 const router = Router();
 const jwtSecret = process.env.JWT_SECRET;
+
+passport.use(new LocalStrategy(
+  (email, password, done) => {
+    const foundUser = users.find((user) => {
+      return (user.email == email && user.password == password)
+    });
+    if (foundUser) {
+      return done(null, foundUser)
+    } else {
+      return done(null, false, {message: 'user not found'});
+    }
+  } 
+));
 
 router.get('/login', (req, res) => {
   res.render('auth/login');
